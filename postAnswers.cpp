@@ -7,6 +7,7 @@
 #include <windows.h> 
 #include "httpClient.hpp" 
 #include "cJSON.h"
+#include "postAnswers.h"
 
 // ==========================================
 // 設定
@@ -69,11 +70,11 @@ int main() {
     std::vector<std::string> dateList = loadDatesFromFile(DATE_FILE);
 
     if (dateList.empty()) {
-        std::cout << "[Error] No valid dates found in date.txt!" << std::endl;
+        LOG << "[Error] No valid dates found in date.txt!" << std::endl;
         return 1;
     }
 
-    std::cout << "[System] Loaded " << dateList.size() << " tasks. Starting batch execution...\n" << std::endl;
+    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting batch execution...\n" << std::endl;
 
     // 初始化隨機數 (用於選項順序)
     std::random_device rd;
@@ -85,9 +86,9 @@ int main() {
     for (size_t i = 0; i < dateList.size(); ++i) {
         std::string TARGET_DATE = dateList[i];
 
-        std::cout << "==================================================" << std::endl;
-        std::cout << "Task [" << (i + 1) << "/" << dateList.size() << "] Target Date: " << TARGET_DATE << std::endl;
-        std::cout << "==================================================" << std::endl;
+        LOG << "==================================================" << std::endl;
+        LOG << "Task [" << (i + 1) << "/" << dateList.size() << "] Target Date: " << TARGET_DATE << std::endl;
+        LOG << "==================================================" << std::endl;
 
         // 【關鍵】HttpClient 宣告於迴圈內
         // 確保每一輪的 Header 都是新的，不會殘留上一輪的 Referer
@@ -96,7 +97,7 @@ int main() {
         // ------------------------------------------------------
         // 第一階段：學生身分 - 獲取 Assignment ID
         // ------------------------------------------------------
-        std::cout << "[1/3] (Student) Fetching Assignment ID..." << std::endl;
+        LOG << "[1/3] (Student) Fetching Assignment ID..." << std::endl;
 
         client.setCookieFile(COOKIE_STUDENT);
         client.addHeader("Accept-Encoding: identity");
@@ -123,16 +124,16 @@ int main() {
         }
 
         if (assignmentId.empty()) {
-            std::cout << "[Skip] Cannot fetch Assignment ID for this date (Assignment may not exist).\n" << std::endl;
+            LOG << "[Skip] Cannot fetch Assignment ID for this date (Assignment may not exist).\n" << std::endl;
             continue; // 跳至下一個日期
         }
-        std::cout << "[Success] Assignment ID: " << assignmentId << std::endl;
+        LOG << "[Success] Assignment ID: " << assignmentId << std::endl;
 
 
         // ------------------------------------------------------
         // 第二階段：管理員身分 - 獲取標準答案
         // ------------------------------------------------------
-        std::cout << "[2/3] (Admin) Fetching answers via Admin..." << std::endl;
+        LOG << "[2/3] (Admin) Fetching answers via Admin..." << std::endl;
 
         client.setCookieFile(COOKIE_ADMIN);
         client.addHeader("referer: https://fireflies.chiculture.org.hk/admin/assignments/" + assignmentId);
@@ -174,7 +175,7 @@ int main() {
         }
 
         if (!finalInfo.valid) {
-            std::cout << "[Error] Failed to extract answers via Admin. Skipping.\n" << std::endl;
+            LOG << "[Error] Failed to extract answers via Admin. Skipping.\n" << std::endl;
             continue;
         }
 
@@ -182,7 +183,7 @@ int main() {
         // ------------------------------------------------------
         // 第三階段：學生身分 - 提交滿分試卷
         // ------------------------------------------------------
-        std::cout << "[3/3] (Student) Submitting correct answers..." << std::endl;
+        LOG << "[3/3] (Student) Submitting correct answers..." << std::endl;
 
         client.setCookieFile(COOKIE_STUDENT);
         client.addHeader("Content-Type: application/json;charset=UTF-8");
@@ -217,10 +218,10 @@ int main() {
         std::string submitResp = client.post(submitUrl, std::string(submitPayload));
 
         if (submitResp.find("score") != std::string::npos || submitResp.find("correct") != std::string::npos) {
-            std::cout << "[Result] Submission Successful!" << std::endl;
+            LOG << "[Result] Submission Successful!" << std::endl;
 
             // Extra Read
-            std::cout << "[Extra] Submitting Extra Read..." << std::endl;
+            LOG << "[Extra] Submitting Extra Read..." << std::endl;
             cJSON* readJson = cJSON_CreateObject();
             cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
             cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
@@ -231,18 +232,18 @@ int main() {
         }
         else {
             // 這裡移除了原始 JSON 輸出，改為簡單提示
-            std::cout << "[Warning] Submission response abnormal." << std::endl;
+            LOG << "[Warning] Submission response abnormal." << std::endl;
         }
 
         cJSON_Delete(submitRoot);
         free(submitPayload);
 
-        std::cout << ">>> Date " << TARGET_DATE << " Completed.\n" << std::endl;
+        LOG << ">>> Date " << TARGET_DATE << " Completed.\n" << std::endl;
 
         // 稍微暫停 1 秒，避免過於頻繁請求被封鎖 (可選)
         Sleep(1000);
     }
 
-    std::cout << "All tasks completed." << std::endl;
+    LOG << "All tasks completed." << std::endl;
     return 0;
 }
