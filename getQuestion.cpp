@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <windows.h>
-#include "httpClient.hpp"
+#include "httpClient/httpClient.hpp"
 #include "cJSON/cJSON.h"
 
 // ==========================================

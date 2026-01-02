@@ -4,10 +4,8 @@
 #include <sstream>
 #include <vector>
 
-#include "../config.h"
-
 const char* FAKE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
-const char* DEFAULT_COOKIE_FILE = "cookies.txt";
+const char* DEFAULT_COOKIE_FILE = "cookies_student.txt";
 
 HttpClient::HttpClient() {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -53,11 +51,7 @@ void HttpClient::setupCommonOptions() {
 
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    #ifdef ENABLE_CURL_LOG
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    #else
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-    #endif
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 }
@@ -73,7 +67,6 @@ std::string HttpClient::get(const std::string& url) {
     chunk.memory = (char*)malloc(1);
     chunk.size = 0;
 
-    // 初始化防垃圾記憶體
     if (chunk.memory) chunk.memory[0] = '\0';
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -89,9 +82,7 @@ std::string HttpClient::get(const std::string& url) {
         }
     }
     else {
-        #ifdef ENABLE_CURL_LOG
-            std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
-        #endif
+        std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
     }
 
     free(chunk.memory);
@@ -105,7 +96,6 @@ std::string HttpClient::post(const std::string& url, const std::string& jsonData
     chunk.memory = (char*)malloc(1);
     chunk.size = 0;
 
-    // 初始化防垃圾記憶體
     if (chunk.memory) chunk.memory[0] = '\0';
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -123,9 +113,7 @@ std::string HttpClient::post(const std::string& url, const std::string& jsonData
         }
     }
     else {
-        #ifdef ENABLE_CURL_LOG
-            std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
-        #endif
+        std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
     }
 
     free(chunk.memory);
@@ -150,7 +138,6 @@ std::string HttpClient::getCookie(const std::string& targetName) {
                 parts.push_back(segment);
             }
 
-            // 確保欄位足夠 (通常第 6 欄是名稱, 第 7 欄是值)
             if (parts.size() >= 7) {
                 if (parts[5] == targetName) {
                     result = parts[6];
