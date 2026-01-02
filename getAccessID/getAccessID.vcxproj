@@ -123,13 +123,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cJSON\cJSON.cpp" />
+    <ClCompile Include="..\cJSON\cJSON.cpp" />
+    <ClCompile Include="..\httpClient\httpClient.cpp" />
     <ClCompile Include="getAccessID.cpp" />
-    <ClCompile Include="httpClient\httpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cJSON\cJSON.h" />
-    <ClInclude Include="httpClient\httpClient.hpp" />
+    <ClInclude Include="..\cJSON\cJSON.h" />
+    <ClInclude Include="..\httpClient\httpClient.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

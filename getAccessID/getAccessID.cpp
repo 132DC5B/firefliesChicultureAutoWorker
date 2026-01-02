@@ -3,8 +3,8 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
-#include "httpClient/httpClient.hpp"
-#include "cJSON/cJSON.h"
+#include "../httpClient/httpClient.hpp"
+#include "../cJSON/cJSON.h"
 
 const std::string ACC_FILE = "acc.txt";
 const std::string TARGET_URL = "https://fireflies.chiculture.org.hk/api/core/auth";
@@ -33,22 +33,26 @@ int main() {
         file.close();
     }
     else {
-        std::cout << "[錯誤] 無法開啟 " << ACC_FILE << "，請確認檔案是否存在。" << std::endl;
+        // [Error] Unable to open acc.txt, please confirm file exists.
+        std::cout << "[Error] Unable to open " << ACC_FILE << ". Please check if the file exists." << std::endl;
         return 1;
     }
 
     if (user_email.empty() || user_passwd.empty()) {
-        std::cout << "[錯誤] 帳號或密碼為空，請檢查 " << ACC_FILE << " 內容。" << std::endl;
+        // [Error] Account or password is empty.
+        std::cout << "[Error] Email or password is empty. Please check content in " << ACC_FILE << "." << std::endl;
         return 1;
     }
 
-    std::cout << "[getAccessID] 讀取帳號: " << user_email << std::endl;
+    // [getAccessID] Reading account...
+    std::cout << "[getAccessID] Reading account: " << user_email << std::endl;
 
     HttpClient client;
 
     client.setCookieFile("cookies_student.txt");
 
-    std::cout << "[getAccessID] 正在登入..." << std::endl;
+    // [getAccessID] Logging in...
+    std::cout << "[getAccessID] Logging in..." << std::endl;
 
     client.addHeader("Accept-Encoding: identity");
     client.addHeader("accept: application/json, text/plain, */*");
@@ -77,15 +81,15 @@ int main() {
 
     if (!accessId.empty()) {
         std::cout << "\n========================================" << std::endl;
-        std::cout << "[成功] 登入成功！" << std::endl;
+        std::cout << "[Success] Login successful!" << std::endl;
         std::cout << "[Access ID] " << accessId.substr(0, 20) << "..." << " ()" << std::endl;
-        std::cout << "[Cookie] 已自動存入 cookies_student.txt。" << std::endl;
+        std::cout << "[Cookie] Automatically saved to cookies_student.txt." << std::endl;
         std::cout << "========================================" << std::endl;
     }
     else {
-        std::cout << "[失敗] 請求似已完成，但未發現 access.id Cookie。" << std::endl;
-        std::cout << "伺服器回覆長度: " << response.length() << std::endl;
-         //std::cout << "伺服器回覆: " << response << std::endl;
+        std::cout << "[Failed] Request completed, but access.id Cookie not found." << std::endl;
+        std::cout << "Response length: " << response.length() << std::endl;
+        //std::cout << "Server response: " << response << std::endl;
     }
 
     return 0;

@@ -132,6 +132,7 @@
     <ClInclude Include="cJSON\cJSON.h" />
     <ClInclude Include="httpClient\httpClient.hpp" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
