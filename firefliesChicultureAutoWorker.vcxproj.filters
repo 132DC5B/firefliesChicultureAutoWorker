@@ -35,7 +35,7 @@
     <ClInclude Include="httpClient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="postAnswers.h">
+    <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

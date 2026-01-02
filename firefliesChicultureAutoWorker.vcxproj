@@ -131,7 +131,7 @@
   <ItemGroup>
     <ClInclude Include="cJSON.h" />
     <ClInclude Include="httpClient.hpp" />
-    <ClInclude Include="postAnswers.h" />
+    <ClInclude Include="config.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

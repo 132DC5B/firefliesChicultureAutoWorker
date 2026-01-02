@@ -2,20 +2,20 @@
 #include <string>
 #include <vector>
 #include <fstream> 
-#include <algorithm> // for trim
+#include <algorithm>
 #include <random>
 #include <windows.h> 
 #include "httpClient.hpp" 
 #include "cJSON.h"
-#include "postAnswers.h"
+#include "config.h"
 
 // ==========================================
-// 設定
+// 基礎設定
 // ==========================================
 const std::string DATE_FILE = "date.txt";
 const std::string BASE_API = "https://fireflies.chiculture.org.hk/api/quiz";
 
-// 檔案名稱
+// 檔名
 const std::string COOKIE_STUDENT = "cookies_student.txt";
 const std::string COOKIE_ADMIN = "cookies_admin.txt";
 
@@ -31,7 +31,7 @@ struct QuizInfo {
     bool valid = false;
 };
 
-// 【修改】讀取多行日期
+// 可讀多行日期
 std::vector<std::string> loadDatesFromFile(const std::string& filename) {
     std::vector<std::string> dates;
     std::ifstream file(filename);
@@ -45,7 +45,7 @@ std::vector<std::string> loadDatesFromFile(const std::string& filename) {
                 line = line.substr(0, end + 1);
             }
             else {
-                continue; // 空行跳過
+                continue; //跳過如果是空行
             }
 
             // 去除首部空白
@@ -66,7 +66,7 @@ std::vector<std::string> loadDatesFromFile(const std::string& filename) {
 int main() {
     SetConsoleOutputCP(65001);
 
-    // 1. 讀取所有日期
+    //讀取所有日期
     std::vector<std::string> dateList = loadDatesFromFile(DATE_FILE);
 
     if (dateList.empty()) {
@@ -90,13 +90,11 @@ int main() {
         LOG << "Task [" << (i + 1) << "/" << dateList.size() << "] Target Date: " << TARGET_DATE << std::endl;
         LOG << "==================================================" << std::endl;
 
-        // 【關鍵】HttpClient 宣告於迴圈內
-        // 確保每一輪的 Header 都是新的，不會殘留上一輪的 Referer
         HttpClient client;
 
-        // ------------------------------------------------------
+        // ======================================================
         // 第一階段：學生身分 - 獲取 Assignment ID
-        // ------------------------------------------------------
+        // ======================================================
         LOG << "[1/3] (Student) Fetching Assignment ID..." << std::endl;
 
         client.setCookieFile(COOKIE_STUDENT);
@@ -125,14 +123,14 @@ int main() {
 
         if (assignmentId.empty()) {
             LOG << "[Skip] Cannot fetch Assignment ID for this date (Assignment may not exist).\n" << std::endl;
-            continue; // 跳至下一個日期
+            continue;
         }
         LOG << "[Success] Assignment ID: " << assignmentId << std::endl;
 
 
-        // ------------------------------------------------------
-        // 第二階段：管理員身分 - 獲取標準答案
-        // ------------------------------------------------------
+        // ======================================================
+        // 第二階段：管理員身分 - 獲取答案
+        // ======================================================
         LOG << "[2/3] (Admin) Fetching answers via Admin..." << std::endl;
 
         client.setCookieFile(COOKIE_ADMIN);
@@ -180,9 +178,9 @@ int main() {
         }
 
 
-        // ------------------------------------------------------
+        // ======================================================
         // 第三階段：學生身分 - 提交滿分試卷
-        // ------------------------------------------------------
+        // ======================================================
         LOG << "[3/3] (Student) Submitting correct answers..." << std::endl;
 
         client.setCookieFile(COOKIE_STUDENT);
@@ -192,7 +190,7 @@ int main() {
 
         cJSON* submitRoot = cJSON_CreateObject();
         cJSON_AddStringToObject(submitRoot, "assignment", finalInfo.assignmentId.c_str());
-        cJSON_AddStringToObject(submitRoot, "assignmentId", finalInfo.assignmentId.c_str()); // 有些接口可能需要這個
+        cJSON_AddStringToObject(submitRoot, "assignmentId", finalInfo.assignmentId.c_str());
         cJSON_AddStringToObject(submitRoot, "lv", finalInfo.level.c_str());
 
         cJSON* answersArray = cJSON_CreateArray();
@@ -219,19 +217,25 @@ int main() {
 
         if (submitResp.find("score") != std::string::npos || submitResp.find("correct") != std::string::npos) {
             LOG << "[Result] Submission Successful!" << std::endl;
+            // ==========================================
+            //   Extra Read
+            // ==========================================
+                #ifdef ENABLE_EXTRA_READ
+                    LOG << "[Extra] Submitting Extra Read..." << std::endl;
+                    cJSON* readJson = cJSON_CreateObject();
+                    cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
+                    cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
 
-            // Extra Read
-            LOG << "[Extra] Submitting Extra Read..." << std::endl;
-            cJSON* readJson = cJSON_CreateObject();
-            cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
-            cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
-            char* readP = cJSON_PrintUnformatted(readJson);
-            client.post(BASE_API + "/answers/extra-read", std::string(readP));
-            cJSON_Delete(readJson);
-            free(readP);
+                    char* readP = cJSON_PrintUnformatted(readJson);
+                
+                    client.post(BASE_API + "/answers/extra-read", std::string(readP));
+
+                    cJSON_Delete(readJson);
+                    free(readP);
+                #endif
+            // ==========================================
         }
         else {
-            // 這裡移除了原始 JSON 輸出，改為簡單提示
             LOG << "[Warning] Submission response abnormal." << std::endl;
         }
 
@@ -240,7 +244,6 @@ int main() {
 
         LOG << ">>> Date " << TARGET_DATE << " Completed.\n" << std::endl;
 
-        // 稍微暫停 1 秒，避免過於頻繁請求被封鎖 (可選)
         Sleep(1000);
     }
 

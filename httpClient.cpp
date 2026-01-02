@@ -4,16 +4,15 @@
 #include <sstream>
 #include <vector>
 
-// 偽裝之 User-Agent
+#include "config.h"
+
 const char* FAKE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
-// 預設 Cookie 檔名
 const char* DEFAULT_COOKIE_FILE = "cookies.txt";
 
 HttpClient::HttpClient() {
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
 
-    // 【重要】初始化預設 Cookie 檔案
     this->cookieFile = DEFAULT_COOKIE_FILE;
 }
 
@@ -23,7 +22,6 @@ HttpClient::~HttpClient() {
     curl_global_cleanup();
 }
 
-// 【新增】動態設定 Cookie 檔案路徑 (用於切換 學生/管理員)
 void HttpClient::setCookieFile(const std::string& filename) {
     this->cookieFile = filename;
 }
@@ -33,12 +31,12 @@ size_t HttpClient::WriteMemoryCallback(void* contents, size_t size, size_t nmemb
     struct MemoryStruct* mem = (struct MemoryStruct*)userp;
 
     char* ptr = (char*)realloc(mem->memory, mem->size + realsize + 1);
-    if (!ptr) return 0; // Out of memory
+    if (!ptr) return 0;
 
     mem->memory = ptr;
     memcpy(&(mem->memory[mem->size]), contents, realsize);
     mem->size += realsize;
-    mem->memory[mem->size] = 0; // 確保結尾有 Null Terminator
+    mem->memory[mem->size] = 0;
 
     return realsize;
 }
@@ -47,22 +45,20 @@ void HttpClient::setupCommonOptions() {
     if (!curl) return;
     curl_easy_setopt(curl, CURLOPT_USERAGENT, FAKE_USER_AGENT);
 
-    // 【修正】使用類別成員變數 cookieFile，而非全域常數
-    // 此舉允許程式在運行時切換不同的 Cookie 檔
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, this->cookieFile.c_str());
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, this->cookieFile.c_str());
 
-    // 忽略 SSL 證書驗證
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-    // 自動跟隨 301/302 跳轉
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    // 開啟詳細除錯模式 (若不需要看詳細握手過程，可設為 0L)
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    #ifdef ENABLE_CURL_LOG
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    #else
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+    #endif
 
-    // 回調函數
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 }
 
@@ -77,7 +73,7 @@ std::string HttpClient::get(const std::string& url) {
     chunk.memory = (char*)malloc(1);
     chunk.size = 0;
 
-    // 初始化防止垃圾記憶體
+    // 初始化防垃圾記憶體
     if (chunk.memory) chunk.memory[0] = '\0';
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -93,7 +89,9 @@ std::string HttpClient::get(const std::string& url) {
         }
     }
     else {
-        std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
+        #ifdef ENABLE_CURL_LOG
+            std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
+        #endif
     }
 
     free(chunk.memory);
@@ -107,7 +105,7 @@ std::string HttpClient::post(const std::string& url, const std::string& jsonData
     chunk.memory = (char*)malloc(1);
     chunk.size = 0;
 
-    // 初始化防止垃圾記憶體
+    // 初始化防垃圾記憶體
     if (chunk.memory) chunk.memory[0] = '\0';
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -125,7 +123,9 @@ std::string HttpClient::post(const std::string& url, const std::string& jsonData
         }
     }
     else {
-        std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
+        #ifdef ENABLE_CURL_LOG
+            std::cerr << "[CURL Error] " << curl_easy_strerror(res) << std::endl;
+        #endif
     }
 
     free(chunk.memory);
