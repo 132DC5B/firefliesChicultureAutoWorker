@@ -23,6 +23,9 @@
     <ClCompile Include="postAnswers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cJSON\cJSON.h">
@@ -35,6 +38,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

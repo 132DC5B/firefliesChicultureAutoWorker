@@ -5,17 +5,18 @@
 #include <algorithm>
 #include <random>
 #include <windows.h> 
+#include "CUI.h"
 #include "httpClient/httpClient.hpp" 
 #include "cJSON/cJSON.h"
 #include "config.h"
 
 // ==========================================
-// 基礎設定
+// Basic Settings
 // ==========================================
 const std::string DATE_FILE = "date.txt";
 const std::string BASE_API = "https://fireflies.chiculture.org.hk/api/quiz";
 
-// 檔名
+// File names
 const std::string COOKIE_STUDENT = "cookies_student.txt";
 const std::string COOKIE_ADMIN = "cookies_admin.txt";
 
@@ -31,7 +32,7 @@ struct QuizInfo {
     bool valid = false;
 };
 
-// 可讀多行日期
+// Function to load dates
 std::vector<std::string> loadDatesFromFile(const std::string& filename) {
     std::vector<std::string> dates;
     std::ifstream file(filename);
@@ -39,16 +40,15 @@ std::vector<std::string> loadDatesFromFile(const std::string& filename) {
 
     if (file.is_open()) {
         while (std::getline(file, line)) {
-            // 去除尾部空白與換行
+            // Trim trailing
             size_t end = line.find_last_not_of(" \t\n\r");
             if (end != std::string::npos) {
                 line = line.substr(0, end + 1);
             }
             else {
-                continue; //跳過如果是空行
+                continue;
             }
 
-            // 去除首部空白
             size_t start = line.find_first_not_of(" \t\n\r");
             if (start != std::string::npos) {
                 line = line.substr(start);
@@ -64,9 +64,15 @@ std::vector<std::string> loadDatesFromFile(const std::string& filename) {
 }
 
 int main() {
+    // Enable ANSI colors for Windows Console
     SetConsoleOutputCP(65001);
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
 
-    //讀取所有日期
+    // Load dates
     std::vector<std::string> dateList = loadDatesFromFile(DATE_FILE);
 
     if (dateList.empty()) {
@@ -74,28 +80,28 @@ int main() {
         return 1;
     }
 
-    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting batch execution...\n" << std::endl;
+    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting batch execution..." << std::endl;
+    // Hide cursor to prevent flickering
+    std::cout << "\033[?25l";
 
-    // 初始化隨機數 (用於選項順序)
     std::random_device rd;
     std::mt19937 gen(rd());
 
     // ==========================================
-    // 批量迴圈開始
+    // Batch Loop Start
     // ==========================================
     for (size_t i = 0; i < dateList.size(); ++i) {
         std::string TARGET_DATE = dateList[i];
 
-        LOG << "==================================================" << std::endl;
-        LOG << "Task [" << (i + 1) << "/" << dateList.size() << "] Target Date: " << TARGET_DATE << std::endl;
-        LOG << "==================================================" << std::endl;
+        // Update Progress: Initial
+        drawProgressBar(i + 1, dateList.size(), TARGET_DATE, "Initializing");
 
         HttpClient client;
 
         // ======================================================
-        // 第一階段：學生身分 - 獲取 Assignment ID
+        // Step 1: Student - Fetch Assignment ID
         // ======================================================
-        LOG << "[1/3] (Student) Fetching Assignment ID..." << std::endl;
+        drawProgressBar(i + 1, dateList.size(), TARGET_DATE, "Fetching ID");
 
         client.setCookieFile(COOKIE_STUDENT);
         client.addHeader("Accept-Encoding: identity");
@@ -122,16 +128,16 @@ int main() {
         }
 
         if (assignmentId.empty()) {
-            LOG << "[Skip] Cannot fetch Assignment ID for this date (Assignment may not exist).\n" << std::endl;
+            // Newline before error logging to preserve progress bar layout
+            std::cout << "\n";
+            LOG << "[Skip] Assignment not found for date: " << TARGET_DATE << std::endl;
             continue;
         }
-        LOG << "[Success] Assignment ID: " << assignmentId << std::endl;
-
 
         // ======================================================
-        // 第二階段：管理員身分 - 獲取答案
+        // Step 2: Admin - Fetch Answers
         // ======================================================
-        LOG << "[2/3] (Admin) Fetching answers via Admin..." << std::endl;
+        drawProgressBar(i + 1, dateList.size(), TARGET_DATE, "Fetching Ans");
 
         client.setCookieFile(COOKIE_ADMIN);
         client.addHeader("referer: https://fireflies.chiculture.org.hk/admin/assignments/" + assignmentId);
@@ -173,15 +179,15 @@ int main() {
         }
 
         if (!finalInfo.valid) {
-            LOG << "[Error] Failed to extract answers via Admin. Skipping.\n" << std::endl;
+            std::cout << "\n";
+            LOG << "[Error] Failed to parse answers for date: " << TARGET_DATE << std::endl;
             continue;
         }
 
-
         // ======================================================
-        // 第三階段：學生身分 - 提交滿分試卷
+        // Step 3: Student - Submit Answers
         // ======================================================
-        LOG << "[3/3] (Student) Submitting correct answers..." << std::endl;
+        drawProgressBar(i + 1, dateList.size(), TARGET_DATE, "Submitting");
 
         client.setCookieFile(COOKIE_STUDENT);
         client.addHeader("Content-Type: application/json;charset=UTF-8");
@@ -216,36 +222,40 @@ int main() {
         std::string submitResp = client.post(submitUrl, std::string(submitPayload));
 
         if (submitResp.find("score") != std::string::npos || submitResp.find("correct") != std::string::npos) {
-            LOG << "[Result] Submission Successful!" << std::endl;
-            // ==========================================
-            //   Extra Read
-            // ==========================================
-                #ifdef ENABLE_EXTRA_READ
-                    LOG << "[Extra] Submitting Extra Read..." << std::endl;
-                    cJSON* readJson = cJSON_CreateObject();
-                    cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
-                    cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
+            // Success - No log needed, progress bar handles it
 
-                    char* readP = cJSON_PrintUnformatted(readJson);
-                
-                    client.post(BASE_API + "/answers/extra-read", std::string(readP));
+            // ==========================================
+            //    Extra Read
+            // ==========================================
+#ifdef ENABLE_EXTRA_READ
+            drawProgressBar(i + 1, dateList.size(), TARGET_DATE, "Extra Read");
+            cJSON* readJson = cJSON_CreateObject();
+            cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
+            cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
 
-                    cJSON_Delete(readJson);
-                    free(readP);
-                #endif
+            char* readP = cJSON_PrintUnformatted(readJson);
+
+            client.post(BASE_API + "/answers/extra-read", std::string(readP));
+
+            cJSON_Delete(readJson);
+            free(readP);
+#endif
             // ==========================================
         }
         else {
-            LOG << "[Warning] Submission response abnormal." << std::endl;
+            std::cout << "\n";
+            LOG << "[Warning] Submission response abnormal: " << TARGET_DATE << std::endl;
         }
 
         cJSON_Delete(submitRoot);
         free(submitPayload);
-
-        LOG << ">>> Date " << TARGET_DATE << " Completed.\n" << std::endl;
     }
 
-    LOG << "All tasks completed." << std::endl;
+    // Show cursor again
+    std::cout << "\033[?25h";
+
+    // Final newline to clear the last progress bar line
+    std::cout << "\n\nAll tasks completed. Press Enter to exit." << std::endl;
     std::cin.get();
     return 0;
 }

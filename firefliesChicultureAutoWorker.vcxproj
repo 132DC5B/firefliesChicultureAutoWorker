@@ -127,9 +127,11 @@
     <ClCompile Include="getQuestion.cpp" />
     <ClCompile Include="httpClient\httpClient.cpp" />
     <ClCompile Include="postAnswers.cpp" />
+    <ClCompile Include="CUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cJSON\cJSON.h" />
+    <ClInclude Include="CUI.h" />
     <ClInclude Include="httpClient\httpClient.hpp" />
     <ClInclude Include="config.h" />
     <ClInclude Include="resource.h" />
