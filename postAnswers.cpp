@@ -243,10 +243,9 @@ int main() {
         free(submitPayload);
 
         LOG << ">>> Date " << TARGET_DATE << " Completed.\n" << std::endl;
-
-        Sleep(1000);
     }
 
     LOG << "All tasks completed." << std::endl;
+    std::cin.get();
     return 0;
 }
