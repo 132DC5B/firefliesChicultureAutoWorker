@@ -23,7 +23,7 @@
     <ClCompile Include="postAnswers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CUI.cpp">
+    <ClCompile Include="CUI\CUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -37,10 +37,7 @@
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CUI.h">
+    <ClInclude Include="CUI\CUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

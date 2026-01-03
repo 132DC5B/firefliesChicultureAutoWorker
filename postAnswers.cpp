@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <random>
 #include <windows.h> 
-#include "CUI.h"
+#include "CUI/CUI.h"
 #include "httpClient/httpClient.hpp" 
 #include "cJSON/cJSON.h"
 #include "config.h"
