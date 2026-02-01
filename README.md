@@ -33,7 +33,7 @@
 - `src/httpClient`：專案自有的 HTTP 客戶端封裝（`httpClient.hpp` 與實作），負責 Header、Cookie 檔案、GET/POST 等方法。若改成 libcurl 或 WinHTTP，請保持相容介面或更新呼叫處。
 - `src/cJSON`：內建的 JSON 處理器（`cJSON.h` / `cJSON.c`），用於解析與產生 JSON。
 - `src/firefliesGUI`：Windows Forms GUI 專案，目標為 .NET Framework4.8，可視化管理 cookie 與日期，非自動化核心但可輔助操作。
-- `config.h`：[config.h](##設定與常見選項（`config.h`）)
+- `config.h`：[config.h](#設定與常見選項configh)
 
 ---
 
