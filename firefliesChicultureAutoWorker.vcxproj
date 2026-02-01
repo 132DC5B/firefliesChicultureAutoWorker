@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cJSON\cJSON.cpp" />
+    <ClCompile Include="src\date\date.cpp" />
     <ClCompile Include="src\getQuestion.cpp" />
     <ClCompile Include="src\httpClient\httpClient.cpp" />
     <ClCompile Include="src\postAnswers.cpp" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="src\cJSON\cJSON.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\date\date.h" />
     <ClInclude Include="src\httpClient\httpClient.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

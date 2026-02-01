@@ -1,18 +1,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream> 
-#include <algorithm>
-#include <random>
 #include <windows.h> 
 #include "httpClient/httpClient.hpp" 
 #include "cJSON/cJSON.h"
-
-//===========================================
 #include "config.h" 
-//Enable LOG defined here to std::cout
-//Enable Extra Read defined here 
-//===========================================
+#include "date/date.h"
 
 // ==========================================
 // Basic Settings
@@ -34,33 +27,19 @@ struct QuizInfo {
     bool valid = false;
 };
 
-// Function to load dates
-std::vector<std::string> loadDatesFromFile(const std::string& filename) {
-    std::vector<std::string> dates;
-    std::ifstream file(filename);
-    if (file.is_open()) {
-        std::string line;
-        while (std::getline(file, line)) {
-            line.erase(0, line.find_first_not_of(" \t\n\r"));
-            line.erase(line.find_last_not_of(" \t\n\r") + 1);
-            if (!line.empty()) dates.push_back(line);
-        }
-        file.close();
-    }
-    return dates;
-}
-
 int main() {
     // Set Console to UTF-8
     SetConsoleOutputCP(65001);
 
+    // Load dates (Auto-expands ranges and skips weekends)
     std::vector<std::string> dateList = loadDatesFromFile(DATE_FILE);
+
     if (dateList.empty()) {
-        LOG << "[Error] No valid dates found in date.txt!" << std::endl;
+        LOG << "[Error] No valid dates found (Check date.txt or if dates are weekends)!" << std::endl;
         return 1;
     }
 
-    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting batch execution..." << std::endl;
+    LOG << "[System] Loaded " << dateList.size() << " tasks (Weekends skipped). Starting..." << std::endl;
 
     for (size_t i = 0; i < dateList.size(); ++i) {
         std::string TARGET_DATE = dateList[i];
