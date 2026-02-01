@@ -1,111 +1,114 @@
 # firefliesChicultureAutoWorker
 
 > [!TIP]
-> ¦¹±M®×¬°¤@²Õ¥Î©ó `fireflies.chiculture.org.hk` ¥­¥xªº¦Û°Ê¤Æ¤u¨ã¡A±Ä¥Î C++¡]C++14¡^»P¤@­Ó Windows Forms GUI¡].NET Framework4.8¡^¡C
-¥Ø¼Ğ¬O¡G¥H¥i­«½Æ¡B¥iºûÅ@ªº¤è¦¡¼ÒÀÀ¨Ï¥ÎªÌ¦æ¬°¡X¡Xµn¤J¡B§ì¨ú§@·~ÃD¥Ø»P¥¿¸Ñ¨Ã¥H¾Ç¥Í¨­¥÷´£¥æµª®×¡C
-¦¹README»¡©ú±M®×µ²ºc¡BÃöÁä¤¸¥ó¡B«Ø¸m»P°£¿ù¤èªk¡A¥H¤ÎÂX¥R»PºûÅ@ªº«ØÄ³¡C
+> æ­¤å°ˆæ¡ˆç‚ºä¸€çµ„ç”¨æ–¼ `fireflies.chiculture.org.hk` å¹³å°çš„è‡ªå‹•åŒ–å·¥å…·ï¼Œæ¡ç”¨ C++ï¼ˆC++14ï¼‰èˆ‡ä¸€å€‹ Windows Forms GUIï¼ˆ.NET Framework4.8ï¼‰ã€‚
+ç›®æ¨™æ˜¯ï¼šä»¥å¯é‡è¤‡ã€å¯ç¶­è­·çš„æ–¹å¼æ¨¡æ“¬ä½¿ç”¨è€…è¡Œç‚ºâ€”â€”ç™»å…¥ã€æŠ“å–ä½œæ¥­é¡Œç›®èˆ‡æ­£è§£ä¸¦ä»¥å­¸ç”Ÿèº«ä»½æäº¤ç­”æ¡ˆã€‚
+æ­¤READMEèªªæ˜å°ˆæ¡ˆçµæ§‹ã€é—œéµå…ƒä»¶ã€å»ºç½®èˆ‡é™¤éŒ¯æ–¹æ³•...
 
 ---
 
 
-# ±M®×·§Äı
+# å°ˆæ¡ˆæ¦‚è¦½
 
-- ¦WºÙ¡G`firefliesChicultureAutoWorker`
+- åç¨±ï¼š`firefliesChicultureAutoWorker`
 
-- ¥Øªº¡G¦Û°Ê¤Æµn¤J¡BÅª¨ú§@·~¡]assignment¡^¡B¨ú±o¥¿½Tµª®×¡]¥H admin cookie¡^¨Ã¥H¾Ç¥Í¨­¥÷´£¥æµª®×¡C
+- ç›®çš„ï¼šè‡ªå‹•åŒ–ç™»å…¥ã€è®€å–ä½œæ¥­ï¼ˆassignmentï¼‰ã€å–å¾—æ­£ç¢ºç­”æ¡ˆï¼ˆä»¥ admin cookieï¼‰ä¸¦ä»¥å­¸ç”Ÿèº«ä»½æäº¤ç­”æ¡ˆã€‚
 
-- §Ş³N¡GC++ (C++14)¡BcJSON¡Bplatform-specific Windows API¡B¥H¤Î¤@­Ó¿ï°tªº Windows Forms GUI¡].NET Framework4.8¡^¡C
-
----
-
-# ­ì©l½X¬[ºc»P»¡©ú
-
-- `src/getAccessID/getAccessID.cpp`¡G±q `acc.txt`Åª¨ú email/password¡A¹ï `https://fireflies.chiculture.org.hk/api/core/auth`¶i¦æµn¤J½Ğ¨D¡A¨Ã§â cookie ¼g¤J `cookies_*.txt`¡C
-
--  `src/postAnswers.cpp`¡G¥Dµ{¦¡¬yµ{¡A¨Ì§Ç¡G
-1. Åª¨ú `date.txt`¡]¥Ñ `src/date`¸ÑªR¡A¤ä´©½d³ò»P¸õ¹L¶g¥½¡^
-2. ¥H¾Ç¥Í cookie ©I¥s `GET /api/quiz/assignments/{date}`¨ú±o `assignmentId`
-3. ¥HºŞ²z­û cookie ©I¥s `GET /api/quiz/assignments/{assignmentId}`¨ú±oÃD¥Ø»P¥¿½Tµª®×
-4. ¥H¾Ç¥Í cookie ©I¥s `POST /api/quiz/answers` ´£¥æµª®×
-5. ¡]¿ï°t¡^­Y±Ò¥Î `ENABLE_EXTRA_READ`¡A·|¦A©I¥s `POST /api/quiz/answers/extra-read`¡C
-
-- `src/date`¡G¤é´Á¸ÑªR¬ÛÃöµ{¦¡¡]`date.h`/`date.cpp`¡^¡A­t³d§â `date.txt` ¤¤ªº±ø¥Ø®i¶}¬°¹ê»Ú³B²zªº¤é´Á²M³æ¡A¨Ã¦Û°Ê±Æ°£¶g¥½¡C
-- `src/httpClient`¡G±M®×¦Û¦³ªº HTTP «È¤áºİ«Ê¸Ë¡]`httpClient.hpp` »P¹ê§@¡^¡A­t³d Header¡BCookie ÀÉ®×¡BGET/POST µ¥¤èªk¡C­Y§ï¦¨ libcurl ©Î WinHTTP¡A½Ğ«O«ù¬Û®e¤¶­±©Î§ó·s©I¥s³B¡C
-- `src/cJSON`¡G¤º«Øªº JSON ³B²z¾¹¡]`cJSON.h` / `cJSON.c`¡^¡A¥Î©ó¸ÑªR»P²£¥Í JSON¡C
-- `src/firefliesGUI`¡GWindows Forms GUI ±M®×¡A¥Ø¼Ğ¬° .NET Framework4.8¡A¥iµø¤ÆºŞ²z cookie »P¤é´Á¡A«D¦Û°Ê¤Æ®Ö¤ß¦ı¥i»²§U¾Ş§@¡C
-- `config.h`¡G¥ş°ì³]©w¡]cookie ¸ô®|¡BAPI base¡B¶}Ãöµ¥¡^¡C
+- æŠ€è¡“ï¼šC++ (C++14)ã€cJSONã€platform-specific Windows APIã€ä»¥åŠä¸€å€‹é¸é…çš„ Windows Forms GUIï¼ˆ.NET Framework4.8ï¼‰ã€‚
 
 ---
 
-# ¶}µo»P«Ø¸mÀô¹Ò
+# åŸå§‹ç¢¼æ¶æ§‹èˆ‡èªªæ˜
 
-- §@·~¨t²Î¡GWindows10/11
-- ½sÄ¶¾¹¡GMSVC (Visual Studio2019/2022)¡AC++14 ¼Ò¦¡
-- .NET¡G­Y­n½sÄ¶ GUI¡A»İ­n¦w¸Ë .NET Framework4.8 SDK
+- `src/getAccessID/getAccessID.cpp`ï¼šå¾ `acc.txt`è®€å– email/passwordï¼Œå° `https://fireflies.chiculture.org.hk/api/core/auth`é€²è¡Œç™»å…¥è«‹æ±‚ï¼Œä¸¦æŠŠ cookie å¯«å…¥ `cookies_*.txt`ã€‚
+
+-  `src/postAnswers.cpp`ï¼šä¸»ç¨‹å¼æµç¨‹ï¼Œä¾åºï¼š
+1. è®€å– `date.txt`ï¼ˆç”± `src/date`è§£æï¼Œæ”¯æ´ç¯„åœèˆ‡è·³éé€±æœ«ï¼‰
+2. ä»¥å­¸ç”Ÿ cookie å‘¼å« `GET /api/quiz/assignments/{date}`å–å¾— `assignmentId`
+3. ä»¥ç®¡ç†å“¡ cookie å‘¼å« `GET /api/quiz/assignments/{assignmentId}`å–å¾—é¡Œç›®èˆ‡æ­£ç¢ºç­”æ¡ˆ
+4. ä»¥å­¸ç”Ÿ cookie å‘¼å« `POST /api/quiz/answers` æäº¤ç­”æ¡ˆ
+5. ï¼ˆé¸é…ï¼‰è‹¥å•Ÿç”¨ `ENABLE_EXTRA_READ`ï¼Œæœƒå†å‘¼å« `POST /api/quiz/answers/extra-read`ã€‚
+
+- `src/date`ï¼šæ—¥æœŸè§£æç›¸é—œç¨‹å¼ï¼ˆ`date.h`/`date.cpp`ï¼‰ï¼Œè² è²¬æŠŠ `date.txt` ä¸­çš„æ¢ç›®å±•é–‹ç‚ºå¯¦éš›è™•ç†çš„æ—¥æœŸæ¸…å–®ï¼Œä¸¦è‡ªå‹•æ’é™¤é€±æœ«ã€‚
+- `src/httpClient`ï¼šå°ˆæ¡ˆè‡ªæœ‰çš„ HTTP å®¢æˆ¶ç«¯å°è£ï¼ˆ`httpClient.hpp` èˆ‡å¯¦ä½œï¼‰ï¼Œè² è²¬ Headerã€Cookie æª”æ¡ˆã€GET/POST ç­‰æ–¹æ³•ã€‚è‹¥æ”¹æˆ libcurl æˆ– WinHTTPï¼Œè«‹ä¿æŒç›¸å®¹ä»‹é¢æˆ–æ›´æ–°å‘¼å«è™•ã€‚
+- `src/cJSON`ï¼šå…§å»ºçš„ JSON è™•ç†å™¨ï¼ˆ`cJSON.h` / `cJSON.c`ï¼‰ï¼Œç”¨æ–¼è§£æèˆ‡ç”¢ç”Ÿ JSONã€‚
+- `src/firefliesGUI`ï¼šWindows Forms GUI å°ˆæ¡ˆï¼Œç›®æ¨™ç‚º .NET Framework4.8ï¼Œå¯è¦–åŒ–ç®¡ç† cookie èˆ‡æ—¥æœŸï¼Œéè‡ªå‹•åŒ–æ ¸å¿ƒä½†å¯è¼”åŠ©æ“ä½œã€‚
+- `config.h`ï¼š[config.h](##è¨­å®šèˆ‡å¸¸è¦‹é¸é …ï¼ˆ`config.h`ï¼‰)
+
+---
+
+# é–‹ç™¼èˆ‡å»ºç½®ç’°å¢ƒ
+
+- ä½œæ¥­ç³»çµ±ï¼šWindows10/11
+- ç·¨è­¯å™¨ï¼šMSVC (Visual Studio2019/2022)ï¼ŒC++14 æ¨¡å¼
+- .NETï¼šè‹¥è¦ç·¨è­¯ GUIï¼Œéœ€è¦å®‰è£ .NET Framework4.8 SDK
 
 
 ---
 
-# °õ¦æ½d¨Ò»P´ú¸Õ¸ê®Æ
+# åŸ·è¡Œç¯„ä¾‹èˆ‡æ¸¬è©¦è³‡æ–™
 
-## ´ú¸ÕÀÉ®×½d¨Ò¡G
+## æ¸¬è©¦æª”æ¡ˆç¯„ä¾‹ï¼š
 
-- `acc.txt`¡]¤@­Ó±b¸¹/±K½XÀÉ¡^¡G
+- `acc.txt`ï¼ˆä¸€å€‹å¸³è™Ÿ/å¯†ç¢¼æª”ï¼‰ï¼š
 ```
 student@example.com
 S3cretP@ss
 ```
-- `date.txt` ¤ä´©®æ¦¡¡G
+- `date.txt` æ”¯æ´æ ¼å¼ï¼š
 ```
-³æ¤é¡G
+å–®æ—¥ï¼š
 2026-01-05
 ```
 ```
-¦h¦æ¡G
+å¤šè¡Œï¼š
 2026-01-05
 2026-01-07
 2026-01-10
  ```
  ```
- ½d³ò¡G
+ ç¯„åœï¼š
  2026-01-05/2026-01-10
- ¡]·|®i¶}¨Ã¸õ¹L¶g¥½¡^
+ ï¼ˆæœƒå±•é–‹ä¸¦è·³éé€±æœ«ï¼‰
 ```
 
-## °õ¦æ¬yµ{¥Ü¨Ò¡]¤â°Ê¡^¡G
-1. ¥H¾Ç¥Í±b¸¹²£¥Í `cookies_student.txt`¡G°õ¦æ `getAccessID`¡A½T»{ `access.id` ¤w¼g¤J cookie ÀÉ¡C
-2. ¥HºŞ²z­û±b¸¹²£¥Í `cookies_admin.txt`¡G¥i¥Î¬Û¦P `getAccessID` µ{¦¡¡]©Î­×§ï°Ñ¼Æ¡^¨ú±oºŞ²z­û cookie¡C
-3. ©ñ¦n `date.txt`¡A°õ¦æ `firefliesChicultureAutoWorker.exe`¡Cµ{¦¡·|Åã¥Ü¨C­Ó³B²z¤é´Áªº¶i«×»P¦¨¥\/¥¢±Ñ°T®§¡C
+## åŸ·è¡Œæµç¨‹ç¤ºä¾‹ï¼ˆæ‰‹å‹•ï¼‰ï¼š
+1. ä»¥å­¸ç”Ÿå¸³è™Ÿç”¢ç”Ÿ `cookies_student.txt`ï¼šåŸ·è¡Œ `getAccessID`ï¼Œç¢ºèª `access.id` å·²å¯«å…¥ cookie æª”ã€‚
+2. ä»¥ç®¡ç†å“¡å¸³è™Ÿç”¢ç”Ÿ `cookies_admin.txt`ï¼šå¯ç”¨ç›¸åŒ `getAccessID` ç¨‹å¼ï¼ˆæˆ–ä¿®æ”¹åƒæ•¸ï¼‰å–å¾—ç®¡ç†å“¡ cookieã€‚
+3. æ”¾å¥½ `date.txt`ï¼ŒåŸ·è¡Œ `firefliesChicultureAutoWorker.exe`ã€‚ç¨‹å¼æœƒé¡¯ç¤ºæ¯å€‹è™•ç†æ—¥æœŸçš„é€²åº¦èˆ‡æˆåŠŸ/å¤±æ•—è¨Šæ¯ã€‚
 
-### ¿é¥XÀÉ®×¡G
-- `cookies_student.txt`¡B`cookies_admin.txt`¡Gcookie Jar¤å¦rÀÉ
-- ¤é»x¿é¥X¨Ï¥Î `LOG << ...`¡]½Ğ°Ñ¦Ò `config.h` ¤¤ªº LOG ©w¸q¡^
+### è¼¸å‡ºæª”æ¡ˆï¼š
+- `cookies_student.txt`ã€`cookies_admin.txt`ï¼šcookie Jaræ–‡å­—æª”
+- æ—¥èªŒè¼¸å‡ºä½¿ç”¨ `LOG << ...`ï¼ˆè«‹åƒè€ƒ `config.h` ä¸­çš„ LOG å®šç¾©ï¼‰
 
 
 
-## ³]©w»P±`¨£¿ï¶µ¡]`config.h`¡^
+## è¨­å®šèˆ‡å¸¸è¦‹é¸é …ï¼ˆ`config.h`ï¼‰
 
-### `config.h` ¤¤¥]§t¡G
+### `config.h` ä¸­åŒ…å«ï¼š
 
-- `#define LOG std::cout` : ©w¸q¤é»x¿é¥X¦ì¸m
-- `#define ENABLE_CURL_LOG`¡G±Ò¥Î libcurl ¸Ô²Ó¤é»x¡]­Y¨Ï¥Î libcurl¡^
-- `#define ENABLE_EXTRA_READ`¡G±Ò¥ÎÃB¥~¾\Åª¥ô°È´£¥æ
+- `#define LOG std::cout` : å®šç¾©æ—¥èªŒè¼¸å‡ºä½ç½®
+- `#define ENABLE_CURL_LOG`ï¼šå•Ÿç”¨ libcurl è©³ç´°æ—¥èªŒ
+- `#define ENABLE_EXTRA_READ`ï¼šå•Ÿç”¨é¡å¤–é–±è®€ä»»å‹™æäº¤
 
 ---
 
-# ­·ÀI¡B¦X³W»P¦w¥ş
+# é¢¨éšªã€åˆè¦èˆ‡å®‰å…¨
 
 > [!WARNING]
-> ¨Ï¥Î¥»¤u¨ã®É¡A½Ğ½T»{¾Ö¦³¬ÛÃö±b¸¹»P¨t²Î¨Ï¥ÎÅv­­¡C¥¼¸g±ÂÅvªº¦Û°Ê¤Æ¥i¯à¹H¤ÏªA°È±ø´Ú©Îªk«ß¡C
+> ä½¿ç”¨æœ¬å·¥å…·æ™‚ï¼Œè«‹ç¢ºèªæ“æœ‰ç›¸é—œå¸³è™Ÿèˆ‡ç³»çµ±ä½¿ç”¨æ¬Šé™ã€‚æœªç¶“æˆæ¬Šçš„è‡ªå‹•åŒ–å¯èƒ½é•åæœå‹™æ¢æ¬¾æˆ–æ³•å¾‹ã€‚
 
 > [!CAUTION]
-> ¤£­n¦b¤½¶} repo ¤¤´£¥æ¥]§t¯u¹ê±K½Xªº `acc.txt` »P cookie ÀÉ¡C
+> ä¸è¦åœ¨å…¬é–‹ repo ä¸­æäº¤åŒ…å«çœŸå¯¦å¯†ç¢¼çš„ `acc.txt` èˆ‡ cookie æª”ã€‚
+
+> [!CAUTION]
+> æœ¬æ¡ˆä¸å°ä»»ä½•å› æ¿«ç”¨é€ æˆçš„å¾Œæœè² è²¬ã€‚
 
 
 ---
 
-# ±ÂÅv
+# æˆæ¬Š
 
-¥»±M®×±Ä¥Î MIT License¡]¨£ `LICENSE.txt`¡^¡C
+æœ¬å°ˆæ¡ˆæ¡ç”¨ MIT Licenseï¼Œ[è¦‹ `LICENSE.txt`](LICENSE.txt)ã€‚
 
 ---
