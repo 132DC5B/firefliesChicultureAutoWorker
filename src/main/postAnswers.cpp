@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <sstream>
 #include <algorithm>
+#include <fstream>
 #include "assignment.h"
 #include "answers.h"
 #include "config.h"
@@ -34,10 +35,26 @@ std::vector<std::string> split_dates(const std::string &s)
 
 int main(int argc, char *argv[])
 {
-    if (argc == 1)
+    std::ifstream cookieFile("cookies_student.txt");
+    bool hasAccessId = false;
+    if (cookieFile.is_open())
+    {
+        std::string line;
+        while (std::getline(cookieFile, line))
+        {
+            if (line.find("access.id") != std::string::npos)
+            {
+                hasAccessId = true;
+                break;
+            }
+        }
+        cookieFile.close();
+    }
+    if (!hasAccessId)
     {
         return 0;
     }
+
     SetConsoleOutputCP(65001);
     bool useFile = true;
     bool useArg = false;

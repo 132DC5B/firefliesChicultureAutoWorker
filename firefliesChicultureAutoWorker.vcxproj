@@ -19,18 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\answers.cpp" />
-    <ClCompile Include="src\assignment.cpp" />
+    <ClCompile Include="src\main\answers.cpp" />
+    <ClCompile Include="src\main\assignment.cpp" />
     <ClCompile Include="lib\cJSON\cJSON.cpp" />
     <ClCompile Include="src\date\date.cpp" />
-    <ClCompile Include="src\getQuestion.cpp" />
+    <ClCompile Include="src\main\getQuestion.cpp" />
     <ClCompile Include="lib\httpClient\httpClient.cpp" />
-    <ClCompile Include="src\postAnswers.cpp" />
+    <ClCompile Include="src\main\postAnswers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\cJSON\cJSON.h" />
-    <ClInclude Include="src\answers.h" />
-    <ClInclude Include="src\assignment.h" />
+    <ClInclude Include="src\main\answers.h" />
+    <ClInclude Include="src\main\assignment.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\date\date.h" />
     <ClInclude Include="lib\httpClient\httpClient.hpp" />
