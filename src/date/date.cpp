@@ -118,3 +118,14 @@ std::vector<std::string> loadDatesFromFile(const std::string& filename) {
     }
     return dates;
 }
+
+std::vector<std::string> loadDatesFromLines(const std::vector<std::string>& lines) {
+    std::vector<std::string> dates;
+    for (const auto& line : lines) {
+        std::string trimmed = trim(line);
+        if (!trimmed.empty()) {
+            processDateLine(trimmed, dates);
+        }
+    }
+    return dates;
+}

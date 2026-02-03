@@ -13,18 +13,18 @@
     <ClCompile Include="getAccessID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\httpClient\httpClient.cpp">
+    <ClCompile Include="..\..\lib\httpClient\httpClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\cJSON\cJSON.cpp">
+    <ClCompile Include="..\..\lib\cJSON\cJSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\httpClient\httpClient.hpp">
+    <ClInclude Include="..\..\lib\httpClient\httpClient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\cJSON\cJSON.h">
+    <ClInclude Include="..\..\lib\cJSON\cJSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

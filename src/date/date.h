@@ -5,5 +5,6 @@
 #include <string>
 
 std::vector<std::string> loadDatesFromFile(const std::string& filename);
+std::vector<std::string> loadDatesFromLines(const std::vector<std::string>& lines);
 
 #endif // DATE_H

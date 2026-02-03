@@ -1,12 +1,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <fstream>
 #include <algorithm>
-#include "../httpClient/httpClient.hpp"
-#include "../cJSON/cJSON.h"
+#include <windows.h>
+#include "../../lib/httpClient/httpClient.hpp"
+#include "../../lib/cJSON/cJSON.h"
 
-const std::string ACC_FILE = "acc.txt";
 const std::string TARGET_URL = "https://fireflies.chiculture.org.hk/api/core/auth";
 
 std::string trim(const std::string& str) {
@@ -18,40 +17,70 @@ std::string trim(const std::string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-int main() {
-    std::ifstream file(ACC_FILE);
-    std::string user_email;
-    std::string user_passwd;
-
-    if (file.is_open()) {
-        if (std::getline(file, user_email)) {
-            user_email = trim(user_email);
-        }
-        if (std::getline(file, user_passwd)) {
-            user_passwd = trim(user_passwd);
-        }
-        file.close();
+// Get the directory of the executable
+std::string getExeDir() {
+    char path[MAX_PATH] = {0};
+    GetModuleFileNameA(NULL, path, MAX_PATH);
+    std::string fullPath(path);
+    size_t pos = fullPath.find_last_of("/\\");
+    if (pos != std::string::npos) {
+        return fullPath.substr(0, pos + 1); // include trailing slash
     }
-    else {
-        // [Error] Unable to open acc.txt, please confirm file exists.
-        std::cout << "[Error] Unable to open " << ACC_FILE << ". Please check if the file exists." << std::endl;
-        return 1;
+    return "";
+}
+
+// Print usage instructions
+void print_usage(const char* progName) {
+    std::cout << "Usage: " << progName << " [-a | -s] -em <email> -pw <password>" << std::endl;
+    std::cout << " -a Generate admin cookie (cookies_admin.txt)" << std::endl;
+    std::cout << " -s Generate student cookie (cookies_student.txt, default)" << std::endl;
+    std::cout << " -em <email> Specify email (account) via command line" << std::endl;
+    std::cout << " -pw <pass> Specify password via command line" << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+    std::string cookieFile = "cookies_student.txt";
+    bool isAdmin = false;
+    std::string user_email, user_passwd;
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-a") {
+            cookieFile = "cookies_admin.txt";
+            isAdmin = true;
+        } else if (arg == "-s") {
+            cookieFile = "cookies_student.txt";
+        } else if (arg == "-em" && i + 1 < argc) {
+            user_email = argv[++i];
+        } else if (arg == "-pw" && i + 1 < argc) {
+            user_passwd = argv[++i];
+        } else if (arg == "-h" || arg == "--help") {
+            print_usage(argv[0]);
+            return 0;
+        } else {
+            std::cout << "[Error] Unknown or incomplete argument: " << arg << std::endl;
+            print_usage(argv[0]);
+            return 1;
+        }
     }
 
+    // If not both provided, print error and usage
     if (user_email.empty() || user_passwd.empty()) {
-        // [Error] Account or password is empty.
-        std::cout << "[Error] Email or password is empty. Please check content in " << ACC_FILE << "." << std::endl;
+        std::cout << "[Error] Both -em <email> and -pw <password> must be provided." << std::endl;
+        print_usage(argv[0]);
         return 1;
     }
 
-    // [getAccessID] Reading account...
-    std::cout << "[getAccessID] Reading account: " << user_email << std::endl;
+    // Get executable directory and prepend to cookie file name
+    std::string exeDir = getExeDir();
+    std::string cookieFilePath = exeDir + cookieFile;
+
+    std::cout << "[getAccessID] Logging in with account: " << user_email << std::endl;
 
     HttpClient client;
+    client.setCookieFile(cookieFilePath);
 
-    client.setCookieFile("cookies_student.txt");
-
-    // [getAccessID] Logging in...
     std::cout << "[getAccessID] Logging in..." << std::endl;
 
     client.addHeader("Accept-Encoding: identity");
@@ -71,9 +100,7 @@ int main() {
     cJSON_AddBoolToObject(root, "persist", cJSON_True);
 
     char* jsonPayload = cJSON_PrintUnformatted(root);
-
     std::string response = client.post(TARGET_URL, std::string(jsonPayload));
-
     cJSON_Delete(root);
     free(jsonPayload);
 
@@ -82,14 +109,12 @@ int main() {
     if (!accessId.empty()) {
         std::cout << "\n========================================" << std::endl;
         std::cout << "[Success] Login successful!" << std::endl;
-        std::cout << "[Access ID] " << accessId.substr(0, 20) << "..." << " ()" << std::endl;
-        std::cout << "[Cookie] Automatically saved to cookies_student.txt." << std::endl;
+        std::cout << "[Access ID] " << accessId.substr(0, 20) << "..." << std::endl;
+        std::cout << "[Cookie] Saved to " << cookieFilePath << std::endl;
         std::cout << "========================================" << std::endl;
-    }
-    else {
-        std::cout << "[Failed] Request completed, but access.id Cookie not found." << std::endl;
+    } else {
+        std::cout << "[Failed] Request completed, but access.id cookie not found." << std::endl;
         std::cout << "Response length: " << response.length() << std::endl;
-        //std::cout << "Server response: " << response << std::endl;
     }
 
     return 0;

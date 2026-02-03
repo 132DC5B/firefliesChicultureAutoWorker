@@ -19,17 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\cJSON\cJSON.cpp" />
+    <ClCompile Include="src\answers.cpp" />
+    <ClCompile Include="src\assignment.cpp" />
+    <ClCompile Include="lib\cJSON\cJSON.cpp" />
     <ClCompile Include="src\date\date.cpp" />
     <ClCompile Include="src\getQuestion.cpp" />
-    <ClCompile Include="src\httpClient\httpClient.cpp" />
+    <ClCompile Include="lib\httpClient\httpClient.cpp" />
     <ClCompile Include="src\postAnswers.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\cJSON\cJSON.h" />
+    <ClInclude Include="lib\cJSON\cJSON.h" />
+    <ClInclude Include="src\answers.h" />
+    <ClInclude Include="src\assignment.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\date\date.h" />
-    <ClInclude Include="src\httpClient\httpClient.hpp" />
+    <ClInclude Include="lib\httpClient\httpClient.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

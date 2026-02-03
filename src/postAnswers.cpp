@@ -1,181 +1,166 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <windows.h> 
-#include "httpClient/httpClient.hpp" 
-#include "cJSON/cJSON.h"
-#include "config.h" 
+#include <windows.h>
+#include <sstream>
+#include <algorithm>
+#include "assignment.h"
+#include "answers.h"
+#include "config.h"
 #include "date/date.h"
 
-// ==========================================
-// Basic Settings
-// ==========================================
-const std::string DATE_FILE = "date.txt";
-const std::string BASE_API = "https://fireflies.chiculture.org.hk/api/quiz";
-const std::string COOKIE_STUDENT = "cookies_student.txt";
-const std::string COOKIE_ADMIN = "cookies_admin.txt";
+void print_usage(const char *progName)
+{
+    std::cout << "Usage: " << progName << " [-f | -nf <date1,date2,...>] [-a] [-e]" << std::endl;
+    std::cout << " -f Use date.txt (default, one date per line or range)" << std::endl;
+    std::cout << " -nf Use comma-separated date list or range as argument (e.g. -nf2024-06-01,2024-06-02/2024-06-05)" << std::endl;
+    std::cout << " -a Random answer mode (do not fetch correct answers)" << std::endl;
+    std::cout << " -e Disable extra read (do not call submitExtraRead)" << std::endl;
+}
 
-struct QuestionAnswer {
-    std::string qId;
-    int correctAns;
-};
+std::vector<std::string> split_dates(const std::string &s)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, ','))
+    {
+        item.erase(std::remove_if(item.begin(), item.end(), ::isspace), item.end());
+        if (!item.empty())
+            result.push_back(item);
+    }
+    return result;
+}
 
-struct QuizInfo {
-    std::string assignmentId;
-    std::string level;
-    std::vector<QuestionAnswer> questions;
-    bool valid = false;
-};
-
-int main() {
-    // Set Console to UTF-8
+int main(int argc, char *argv[])
+{
+    if (argc == 1)
+    {
+        return 0;
+    }
     SetConsoleOutputCP(65001);
+    bool useFile = true;
+    bool useArg = false;
+    bool randomAnswerMode = false;
+    bool enableExtraRead = true;
+    std::vector<std::string> dateList;
+    std::string argDates;
 
-    // Load dates (Auto-expands ranges and skips weekends)
-    std::vector<std::string> dateList = loadDatesFromFile(DATE_FILE);
+    // Parse arguments
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+        if (arg == "-f")
+        {
+            if (useArg)
+            {
+                std::cout << "[Error] -f and -nf cannot be used together." << std::endl;
+                print_usage(argv[0]);
+                return 1;
+            }
+            useFile = true;
+        }
+        else if (arg == "-nf")
+        {
+            if (!useFile)
+            {
+                std::cout << "[Error] -f and -nf cannot be used together." << std::endl;
+                print_usage(argv[0]);
+                return 1;
+            }
+            useFile = false;
+            useArg = true;
+            if (i + 1 < argc)
+            {
+                argDates = argv[++i];
+            }
+            else
+            {
+                std::cout << "[Error] -nf requires a comma-separated date list or range." << std::endl;
+                print_usage(argv[0]);
+                return 1;
+            }
+        }
+        else if (arg == "-a")
+        {
+            randomAnswerMode = true;
+        }
+        else if (arg == "-e")
+        {
+            enableExtraRead = false;
+        }
+        else if (arg == "-h" || arg == "--help")
+        {
+            print_usage(argv[0]);
+            return 0;
+        }
+        else
+        {
+            std::cout << "[Error] Unknown argument: " << arg << std::endl;
+            print_usage(argv[0]);
+            return 1;
+        }
+    }
 
-    if (dateList.empty()) {
-        LOG << "[Error] No valid dates found (Check date.txt or if dates are weekends)!" << std::endl;
+    if (useFile)
+    {
+        dateList = loadDatesFromFile("date.txt");
+    }
+    else if (useArg)
+    {
+        std::vector<std::string> lines = split_dates(argDates);
+        dateList = loadDatesFromLines(lines);
+    }
+
+    if (dateList.empty())
+    {
+        LOG << "[Error] No valid dates found!" << std::endl;
         return 1;
     }
 
-    LOG << "[System] Loaded " << dateList.size() << " tasks (Weekends skipped). Starting..." << std::endl;
-
-    for (size_t i = 0; i < dateList.size(); ++i) {
+    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting..." << std::endl;
+    for (size_t i = 0; i < dateList.size(); ++i)
+    {
         std::string TARGET_DATE = dateList[i];
         LOG << "\n[Task " << (i + 1) << "/" << dateList.size() << "] Processing Date: " << TARGET_DATE << std::endl;
-
-        HttpClient client;
-
-        // Step 1: Student - Fetch Assignment ID
+        std::string assignmentId, level;
         LOG << "[Step] Fetching ID..." << std::endl;
-        client.setCookieFile(COOKIE_STUDENT);
-        client.addHeader("Accept-Encoding: identity");
-        client.addHeader("referer: https://fireflies.chiculture.org.hk/app/assignments/" + TARGET_DATE);
-
-        std::string studentUrl = BASE_API + "/assignments/" + TARGET_DATE;
-        std::string studentResp = client.get(studentUrl);
-
-        std::string assignmentId = "";
-        std::string level = "";
-
-        cJSON* sJson = cJSON_Parse(studentResp.c_str());
-        if (sJson) {
-            cJSON* data = cJSON_GetObjectItem(sJson, "data");
-            cJSON* root = data ? data : sJson;
-            cJSON* idItem = cJSON_GetObjectItem(root, "id");
-            if (!idItem) idItem = cJSON_GetObjectItem(root, "_id");
-            cJSON* lvItem = cJSON_GetObjectItem(root, "lv");
-
-            if (idItem && idItem->valuestring) {
-                assignmentId = idItem->valuestring;
-                if (lvItem && lvItem->valuestring) level = lvItem->valuestring;
-            }
-            cJSON_Delete(sJson);
-        }
-
-        if (assignmentId.empty()) {
+        if (!fetchAssignmentId(TARGET_DATE, assignmentId, level))
+        {
             LOG << "[Skip] Assignment not found for date: " << TARGET_DATE << std::endl;
             continue;
         }
-
-        // Step 2: Admin - Fetch Answers
-        LOG << "[Step] Fetching Ans..." << std::endl;
-        client.setCookieFile(COOKIE_ADMIN);
-        client.addHeader("referer: https://fireflies.chiculture.org.hk/admin/assignments/" + assignmentId);
-
-        std::string adminUrl = BASE_API + "/assignments/" + assignmentId;
-        std::string adminResp = client.get(adminUrl);
-
         QuizInfo finalInfo;
-        finalInfo.assignmentId = assignmentId;
-        finalInfo.level = level;
-
-        cJSON* aJson = cJSON_Parse(adminResp.c_str());
-        if (aJson) {
-            cJSON* data = cJSON_GetObjectItem(aJson, "data");
-            cJSON* root = data ? data : aJson;
-            cJSON* questions = cJSON_GetObjectItem(root, "questions");
-            if (!questions) {
-                cJSON* article = cJSON_GetObjectItem(root, "article");
-                if (article) questions = cJSON_GetObjectItem(article, "questions");
+        if (randomAnswerMode)
+        {
+            LOG << "[Step] Generating random answers..." << std::endl;
+            if (!fetchQuestions(assignmentId, level, finalInfo))
+            {
+                LOG << "[Error] Failed to fetch questions for date: " << TARGET_DATE << std::endl;
+                continue;
             }
-
-            if (questions && cJSON_IsArray(questions)) {
-                int qCount = cJSON_GetArraySize(questions);
-                for (int j = 0; j < qCount; j++) {
-                    cJSON* q = cJSON_GetArrayItem(questions, j);
-                    cJSON* qid = cJSON_GetObjectItem(q, "_id");
-                    cJSON* ansItem = cJSON_GetObjectItem(q, "answer");
-                    if (!ansItem) ansItem = cJSON_GetObjectItem(q, "correctAnswer");
-
-                    if (qid && qid->valuestring && ansItem) {
-                        QuestionAnswer qa;
-                        qa.qId = qid->valuestring;
-                        qa.correctAns = ansItem->valueint;
-                        finalInfo.questions.push_back(qa);
-                    }
-                }
-                if (!finalInfo.questions.empty()) finalInfo.valid = true;
+        }
+        else
+        {
+            LOG << "[Step] Fetching Ans..." << std::endl;
+            if (!fetchAnswers(assignmentId, level, finalInfo))
+            {
+                LOG << "[Error] Failed to parse answers for date: " << TARGET_DATE << std::endl;
+                continue;
             }
-            cJSON_Delete(aJson);
         }
-
-        if (!finalInfo.valid) {
-            LOG << "[Error] Failed to parse answers for date: " << TARGET_DATE << std::endl;
-            continue;
-        }
-
-        // Step 3: Student - Submit Answers
         LOG << "[Step] Submitting..." << std::endl;
-        client.setCookieFile(COOKIE_STUDENT);
-        client.addHeader("Content-Type: application/json;charset=UTF-8");
-        client.addHeader("origin: https://fireflies.chiculture.org.hk");
-        client.addHeader("referer: https://fireflies.chiculture.org.hk/app/assignments/" + TARGET_DATE);
-
-        cJSON* submitRoot = cJSON_CreateObject();
-        cJSON_AddStringToObject(submitRoot, "assignment", finalInfo.assignmentId.c_str());
-        cJSON_AddStringToObject(submitRoot, "assignmentId", finalInfo.assignmentId.c_str());
-        cJSON_AddStringToObject(submitRoot, "lv", finalInfo.level.c_str());
-
-        cJSON* answersArray = cJSON_CreateArray();
-        for (const auto& qa : finalInfo.questions) {
-            cJSON* ansObj = cJSON_CreateObject();
-            cJSON_AddStringToObject(ansObj, "question", qa.qId.c_str());
-            cJSON_AddStringToObject(ansObj, "format", "single-select");
-            const char* rands_data[] = { "0", "1", "2", "3" };
-            cJSON_AddItemToObject(ansObj, "randoms", cJSON_CreateStringArray(rands_data, 4));
-            cJSON_AddStringToObject(ansObj, "answered", std::to_string(qa.correctAns).c_str());
-            cJSON_AddItemToObject(ansObj, "answeredSeq", cJSON_CreateArray());
-            cJSON_AddItemToArray(answersArray, ansObj);
-        }
-        cJSON_AddItemToObject(submitRoot, "answers", answersArray);
-
-        char* submitPayload = cJSON_PrintUnformatted(submitRoot);
-        std::string submitResp = client.post(BASE_API + "/answers", std::string(submitPayload));
-
-        if (submitResp.find("score") != std::string::npos || submitResp.find("correct") != std::string::npos) {
+        if (submitAnswers(finalInfo, TARGET_DATE))
+        {
             LOG << "[Success] Task completed for: " << TARGET_DATE << std::endl;
-
-#ifdef ENABLE_EXTRA_READ
-            LOG << "[Step] Extra Read..." << std::endl;
-            cJSON* readJson = cJSON_CreateObject();
-            cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
-            cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
-            char* readP = cJSON_PrintUnformatted(readJson);
-            client.post(BASE_API + "/answers/extra-read", std::string(readP));
-            cJSON_Delete(readJson);
-            free(readP);
-#endif
+            if (enableExtraRead)
+                submitExtraRead(finalInfo);
         }
-        else {
+        else
+        {
             LOG << "[Warning] Submission response abnormal: " << TARGET_DATE << std::endl;
         }
-
-        cJSON_Delete(submitRoot);
-        free(submitPayload);
     }
-
     LOG << "\nAll tasks completed. Press Enter to exit." << std::endl;
     std::cin.get();
     return 0;

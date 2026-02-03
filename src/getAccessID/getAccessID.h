@@ -7,6 +7,5 @@
 #endif
 
 extern "C" {
- // 回傳 true 表示成功，false 表示失敗
  GETACCESSID_API bool LoginAndSaveCookie(const char* email, const char* password, const char* cookieFile);
 }

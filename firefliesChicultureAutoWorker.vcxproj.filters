@@ -21,13 +21,19 @@
     <ClCompile Include="src\postAnswers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\httpClient\httpClient.cpp">
+    <ClCompile Include="lib\httpClient\httpClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\cJSON\cJSON.cpp">
+    <ClCompile Include="lib\cJSON\cJSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\date\date.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assignment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\answers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,13 +41,19 @@
     <ClInclude Include="src\config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\httpClient\httpClient.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\cJSON\cJSON.h">
+    <ClInclude Include="lib\httpClient\httpClient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\date\date.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assignment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\answers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\cJSON\cJSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

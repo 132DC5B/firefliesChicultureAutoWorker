@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 
-#include "../config.h" // ENABLE_CURL_LOG defined here
+#include "../../src/config.h" // ENABLE_CURL_LOG defined here
 
 const char* FAKE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
 const char* DEFAULT_COOKIE_FILE = "cookies.txt";
