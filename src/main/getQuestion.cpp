@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <windows.h>
-#include "../lib/httpClient/httpClient.hpp"
-#include "../lib/cJSON/cJSON.h"
+#include "../../lib/httpClient/httpClient.hpp"
+#include "../../lib/cJSON/cJSON.h"
 
 // ==========================================
 // 目標設定

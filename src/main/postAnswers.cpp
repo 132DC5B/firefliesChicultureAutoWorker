@@ -7,8 +7,8 @@
 #include <fstream>
 #include "assignment.h"
 #include "answers.h"
-#include "config.h"
-#include "date/date.h"
+#include "../config.h"
+#include "../date/date.h"
 
 void print_usage(const char *progName)
 {

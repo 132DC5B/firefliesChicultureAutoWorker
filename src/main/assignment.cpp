@@ -1,6 +1,6 @@
 #include "assignment.h"
-#include "../lib//httpClient/httpClient.hpp"
-#include "../lib/cJSON/cJSON.h"
+#include "../../lib//httpClient/httpClient.hpp"
+#include "../../lib/cJSON/cJSON.h"
 #include <string>
 #include <vector>
 #include <random>
