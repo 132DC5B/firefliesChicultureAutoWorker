@@ -103,8 +103,8 @@ void submitExtraRead(const QuizInfo &finalInfo)
     cJSON *readJson = cJSON_CreateObject();
 
     // Log parameters for debugging
-    std::cout << "[Extra Read Params] assignment: " << finalInfo.assignmentId
-              << ", lv: " << finalInfo.level << std::endl;
+    //std::cout << "[Extra Read Params] assignment: " << finalInfo.assignmentId
+    //          << ", lv: " << finalInfo.level << std::endl;
 
     cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
     cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
