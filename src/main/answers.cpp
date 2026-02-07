@@ -3,6 +3,7 @@
 #include "../../lib/cJSON/cJSON.h"
 #include <string>
 #include <vector>
+#include <iostream> // Include iostream for console output
 
 const std::string BASE_API = "https://fireflies.chiculture.org.hk/api/quiz";
 const std::string COOKIE_STUDENT = "cookies_student.txt";
@@ -92,11 +93,24 @@ bool submitAnswers(const QuizInfo &finalInfo, const std::string &date)
 void submitExtraRead(const QuizInfo &finalInfo)
 {
     HttpClient client;
+    client.setCookieFile(COOKIE_STUDENT); // Set student cookie
+    //client.addHeader("accept: application/json, text/plain, */*");
+    client.addHeader("content-type: application/json;charset=UTF-8");
+    //client.addHeader("priority: u=1, i");
+    //client.addHeader("sec-ch-ua: \"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"144\", \"Google Chrome\";v=\"144\"");
+    //client.addHeader("sec-ch-ua-mobile: ?0");
+    //client.addHeader("sec-ch-ua-platform: \"Windows\"");
     cJSON *readJson = cJSON_CreateObject();
+
+    // Log parameters for debugging
+    std::cout << "[Extra Read Params] assignment: " << finalInfo.assignmentId
+              << ", lv: " << finalInfo.level << std::endl;
+
     cJSON_AddStringToObject(readJson, "assignment", finalInfo.assignmentId.c_str());
     cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
     char *readP = cJSON_PrintUnformatted(readJson);
-    client.post(BASE_API + "/answers/extra-read", std::string(readP));
+    std::string resp = client.post(BASE_API + "/answers/extra-read", std::string(readP));
+    std::cout << "[Extra Read Response] " << resp << std::endl;
     cJSON_Delete(readJson);
     free(readP);
 }

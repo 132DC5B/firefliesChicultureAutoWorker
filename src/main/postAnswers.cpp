@@ -5,10 +5,14 @@
 #include <sstream>
 #include <algorithm>
 #include <fstream>
+#include <future>
+#include <mutex>
 #include "assignment.h"
 #include "answers.h"
 #include "../config.h"
 #include "../date/date.h"
+
+std::mutex logMutex;
 
 void print_usage(const char *progName)
 {
@@ -31,6 +35,56 @@ std::vector<std::string> split_dates(const std::string &s)
             result.push_back(item);
     }
     return result;
+}
+
+void processTask(size_t index, size_t total, std::string TARGET_DATE, bool randomAnswerMode, bool enableExtraRead) {
+    std::string assignmentId, level;
+    
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+        LOG << "\n[Task " << (index + 1) << "/" << total << "] Processing Date: " << TARGET_DATE << std::endl;
+    }
+
+    if (!fetchAssignmentId(TARGET_DATE, assignmentId, level))
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+        LOG << "[Skip] Assignment not found for date: " << TARGET_DATE << std::endl;
+        return;
+    }
+
+    QuizInfo finalInfo;
+    bool success = false;
+    if (randomAnswerMode)
+    {
+        success = fetchQuestions(assignmentId, level, finalInfo);
+    }
+    else
+    {
+        success = fetchAnswers(assignmentId, level, finalInfo);
+    }
+
+    if (!success)
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+        LOG << "[Error] Failed to fetch/parse for date: " << TARGET_DATE << std::endl;
+        return;
+    }
+
+    if (submitAnswers(finalInfo, TARGET_DATE))
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+        LOG << "[Success] Task completed for: " << TARGET_DATE << std::endl;
+        if (enableExtraRead)
+            submitExtraRead(finalInfo);
+    }
+    else
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+        LOG << "[Warning] Submission response abnormal: " << TARGET_DATE << std::endl;
+        // Even if the main submission looked weird, try extra read if enabled
+        if (enableExtraRead)
+            submitExtraRead(finalInfo);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -135,49 +189,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting..." << std::endl;
+    LOG << "[System] Loaded " << dateList.size() << " tasks. Starting multi-threaded execution..." << std::endl;
+    
+    std::vector<std::future<void>> futures;
     for (size_t i = 0; i < dateList.size(); ++i)
     {
-        std::string TARGET_DATE = dateList[i];
-        LOG << "\n[Task " << (i + 1) << "/" << dateList.size() << "] Processing Date: " << TARGET_DATE << std::endl;
-        std::string assignmentId, level;
-        LOG << "[Step] Fetching ID..." << std::endl;
-        if (!fetchAssignmentId(TARGET_DATE, assignmentId, level))
-        {
-            LOG << "[Skip] Assignment not found for date: " << TARGET_DATE << std::endl;
-            continue;
-        }
-        QuizInfo finalInfo;
-        if (randomAnswerMode)
-        {
-            LOG << "[Step] Generating random answers..." << std::endl;
-            if (!fetchQuestions(assignmentId, level, finalInfo))
-            {
-                LOG << "[Error] Failed to fetch questions for date: " << TARGET_DATE << std::endl;
-                continue;
-            }
-        }
-        else
-        {
-            LOG << "[Step] Fetching Ans..." << std::endl;
-            if (!fetchAnswers(assignmentId, level, finalInfo))
-            {
-                LOG << "[Error] Failed to parse answers for date: " << TARGET_DATE << std::endl;
-                continue;
-            }
-        }
-        LOG << "[Step] Submitting..." << std::endl;
-        if (submitAnswers(finalInfo, TARGET_DATE))
-        {
-            LOG << "[Success] Task completed for: " << TARGET_DATE << std::endl;
-            if (enableExtraRead)
-                submitExtraRead(finalInfo);
-        }
-        else
-        {
-            LOG << "[Warning] Submission response abnormal: " << TARGET_DATE << std::endl;
-        }
+        futures.push_back(std::async(std::launch::async, processTask, i, dateList.size(), dateList[i], randomAnswerMode, enableExtraRead));
     }
+
+    // Wait for all tasks to complete
+    for (auto &f : futures)
+    {
+        f.get();
+    }
+
     LOG << "\nAll tasks completed. Press Enter to exit." << std::endl;
     std::cin.get();
     return 0;

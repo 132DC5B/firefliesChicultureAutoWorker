@@ -76,6 +76,9 @@ int main(int argc, char* argv[]) {
     std::string exeDir = getExeDir();
     std::string cookieFilePath = exeDir + cookieFile;
 
+    // Delete old cookie file if exists
+    DeleteFileA(cookieFilePath.c_str());
+
     std::cout << "[getAccessID] Logging in with account: " << user_email << std::endl;
 
     HttpClient client;
@@ -112,10 +115,10 @@ int main(int argc, char* argv[]) {
         std::cout << "[Access ID] " << accessId.substr(0, 20) << "..." << std::endl;
         std::cout << "[Cookie] Saved to " << cookieFilePath << std::endl;
         std::cout << "========================================" << std::endl;
+        return 0;
     } else {
         std::cout << "[Failed] Request completed, but access.id cookie not found." << std::endl;
         std::cout << "Response length: " << response.length() << std::endl;
+        return 0xff;
     }
-
-    return 0;
 }
