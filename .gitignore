@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /cookies_admin.txt
 /date.txt
+/src/main/getQuestion.cpp
