@@ -53,7 +53,7 @@
 | 函數/方法 | 參數 | 描述 |
 | :--- | :--- | :--- |
 | **`main`** | `argc`, `argv` | 1. 檢查 `cookies_student.txt` 是否存在且有效。<br>2. 解析參數 `-f` (讀檔), `-nf` (讀參數), `-a` (隨機), `-e` (停用額外閱讀)。<br>3. 建立 `std::vector<std::future<void>>` 執行緒池，並行啟動多個 `processTask`。 |
-| **`processTask`** | `index`, `total` (進度顯示)<br>`TARGET_DATE` (目標日期)<br>`randomMode` (隨機)<br>`extraRead` (閱讀) | **核心工作單元**。負責處理**單一日期**的所有流程：<br>1. 呼叫 `fetchAssignmentId`。<br>2. 根據模式呼叫 `fetchAnswers` 或 `fetchQuestions`。<br>3. 呼叫 `submitAnswers`。<br>4. 若成功且啟用，呼叫 `submitExtraRead`。<br>此函數內使用 `std::mutex` 鎖保護 Log 輸出。 |
+| **`processTask`** | `index`, `total` (進度顯示)<br>`TARGET_DATE` (目標日期)<br>`randomMode` (隨機)<br>`extraRead` (額外閱讀) | **核心工作單元**。負責處理**單一日期**的所有流程：<br>1. 呼叫 `fetchAssignmentId`。<br>2. 根據模式呼叫 `fetchAnswers` 或 `fetchQuestions`。<br>3. 呼叫 `submitAnswers`。<br>4. 若成功且啟用，呼叫 `submitExtraRead`。<br>此函數內使用 `std::mutex` 鎖保護 Log 輸出。 |
 | **`split_dates`** | `s` (逗號分隔字串) | 將命令列傳入的日期字串 (e.g., "2023-01-01,2023-01-02") 分割為 `vector<string>`。 |
 
 ##### 2. 任務邏輯 (`src/main/assignment.cpp`, `answers.cpp`)
