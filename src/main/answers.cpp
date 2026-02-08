@@ -110,7 +110,6 @@ void submitExtraRead(const QuizInfo &finalInfo)
     cJSON_AddStringToObject(readJson, "lv", finalInfo.level.c_str());
     char *readP = cJSON_PrintUnformatted(readJson);
     std::string resp = client.post(BASE_API + "/answers/extra-read", std::string(readP));
-    std::cout << "[Extra Read Response] " << resp << std::endl;
     cJSON_Delete(readJson);
     free(readP);
 }
