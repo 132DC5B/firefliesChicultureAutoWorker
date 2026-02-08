@@ -42,13 +42,13 @@ bool fetchAssignmentId(const std::string &date, std::string &assignmentId, std::
 bool fetchQuestions(const std::string &assignmentId, const std::string &level, QuizInfo &finalInfo)
 {
     HttpClient client;
-    client.setCookieFile(COOKIE_ADMIN);
-    client.addHeader("referer: https://fireflies.chiculture.org.hk/admin/assignments/" + assignmentId);
-    std::string adminUrl = BASE_API + "/assignments/" + assignmentId;
-    std::string adminResp = client.get(adminUrl);
+    client.setCookieFile(COOKIE_STUDENT);
+    client.addHeader("referer: https://fireflies.chiculture.org.hk/app/assignments/" + assignmentId);
+    std::string url = BASE_API + "/assignments/" + assignmentId;
+    std::string resp = client.get(url);
     finalInfo.assignmentId = assignmentId;
     finalInfo.level = level;
-    cJSON *aJson = cJSON_Parse(adminResp.c_str());
+    cJSON *aJson = cJSON_Parse(resp.c_str());
     bool valid = false;
     if (aJson)
     {

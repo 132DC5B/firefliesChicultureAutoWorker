@@ -81,7 +81,6 @@ void processTask(size_t index, size_t total, std::string TARGET_DATE, bool rando
     {
         std::lock_guard<std::mutex> lock(logMutex);
         LOG << "[Warning] Submission response abnormal: " << TARGET_DATE << std::endl;
-        // Even if the main submission looked weird, try extra read if enabled
         if (enableExtraRead)
             submitExtraRead(finalInfo);
     }
